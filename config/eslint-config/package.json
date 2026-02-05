@@ -1,0 +1,21 @@
+{
+  "name": "@neko/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./base": "./base.cjs",
+    "./react": "./react.cjs",
+    "./node": "./node.cjs"
+  },
+  "devDependencies": {
+    "@rocketseat/eslint-config": "^2.2.2",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "@neko/prettier": "*"
+  },
+  "prettier": "@neko/prettier",
+  "eslintConfig": {
+    "extends": [
+      "./library.cjs"
+    ]
+  }
+}

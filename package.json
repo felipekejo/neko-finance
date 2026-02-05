@@ -9,9 +9,7 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
-    "prettier": "^3.7.4",
-    "turbo": "^2.8.0",
-    "typescript": "5.9.2"
+    "turbo": "^2.8.0"
   },
   "engines": {
     "node": ">=18"
@@ -19,6 +17,7 @@
   "packageManager": "npm@10.9.0",
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "config/*"
   ]
 }
