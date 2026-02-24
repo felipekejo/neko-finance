@@ -1,0 +1,30 @@
+{
+  "name": "@neko/api",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "11.2.0",
+    "@prisma/client": "6.19.1",
+    "better-auth": "^1.4.6",
+    "dotenv": "17.2.3",
+    "fastify": "5.6.2",
+    "fastify-type-provider-zod": "^6.1.0",
+    "zod": "4.1.13"
+  },
+  "devDependencies": {
+    "@neko/eslint-config": "*",
+    "@neko/prettier": "*",
+    "@neko/tsconfig": "*",
+    "@types/node": "^25.2.0",
+    "prisma": "^7.4.0",
+    "tsx": "^4.21.0"
+  },
+  "prettier": "@neko/prettier",
+  "eslintConfig": {
+    "extends": "@neko/eslint-config/node"
+  }
+}

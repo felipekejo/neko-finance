@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  neko-finance:
+    container_name: neko-finance
+    image: 'postgres'
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: neko-finance
+    ports:
+      - '5432:5432'

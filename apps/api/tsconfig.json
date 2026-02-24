@@ -1,0 +1,7 @@
+{
+  "extends": "@neko/tsconfig/node.json",
+  "include": [
+    "src/**/*",
+    "generated"
+  ]
+}
