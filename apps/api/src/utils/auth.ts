@@ -1,20 +1,22 @@
+import { env } from "@/env";
 import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "../lib/prisma";
+import { Pool } from "pg";
 
-
+const pool = new Pool({
+  connectionString: env.DATABASE_URL,
+});
 
 export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
-    provider: "postgresql",
-  }),
+  baseURL: "http://localhost:3333",
+  basePath: "/auth",
+  database: pool,
   emailAndPassword: {
     enabled: true,
   },
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }
-  }
-});
+  logger: {
+    level: "debug",
+  },
+  trustedOrigins: [
+    process.env.CLIENT_ORIGIN ?? "http://localhost:3333",
+  ],
+})

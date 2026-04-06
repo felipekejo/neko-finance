@@ -1,7 +1,24 @@
 {
   "extends": "@neko/tsconfig/node.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
   "include": [
-    "src/**/*",
+    "src/app.ts",
+    "src/server.ts",
+    "src/utils/**/*.ts",
+    "src/core/**/*.ts",
+    "src/domain/**/*.ts",
+    "src/lib/**/*.ts",
     "generated"
+  ],
+  "exclude": [
+    "src/infra/**",
+    "**/*.spec.ts",
+    "**/*.e2e-spec.ts",
+    "src/**/*.js"
   ]
 }

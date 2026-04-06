@@ -6,7 +6,8 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  // output   = "../../../node_modules/.prisma/client"
+  output   = "../src/generated"
 }
 
 datasource db {
@@ -14,16 +15,17 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid(7))
-  email         String    @unique
-  password      String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id            String        @id @default(uuid(7))
+  email         String        @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   name          String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean       @default(false)
   image         String?
   sessions      Session[]
   accounts      Account[]
+  userBudgets   UserBudget[]
+  bankAccounts  BankAccount[]
 
   @@map("user")
 }
@@ -74,4 +76,100 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Budget {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime  @default(now()) @map("create_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  categories   Category[]
+  transactions Transaction[]
+  bankAccounts BankAccount[]
+
+  UserBudget UserBudget[]
+
+  @@map("budgets")
+}
+
+model UserBudget {
+  userId   String
+  budgetId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  budget Budget @relation(fields: [budgetId], references: [id])
+
+  @@id([userId, budgetId]) // Composite primary key for many-to-many relationship
+  @@map("user_budgets")
+}
+
+model BankAccount {
+  id           String        @id @default(uuid())
+  ownerId      String        @map("owner_id")
+  name         String
+  balance      Int           @default(0)
+  createdAt    DateTime      @default(now()) @map("create_at")
+  updatedAt    DateTime?     @updatedAt @map("updated_at")
+  budgetId     String
+  transactions Transaction[]
+
+  Budget Budget @relation(fields: [budgetId], references: [id])
+  owner  User   @relation(fields: [ownerId], references: [id])
+
+  @@map("bank_accounts")
+}
+
+enum TypeTransaction {
+  EXPENSES
+  INCOMES
+}
+
+model Transaction {
+  id            String    @id @default(uuid())
+  description   String
+  createdAt     DateTime  @default(now()) @map("create_at")
+  updatedAt     DateTime? @updatedAt @map("updated_at")
+  amount        Int
+  budgetId      String
+  categoryId    String
+  subCategoryId String?
+  date          DateTime
+  bankAccountId String
+
+  type TypeTransaction
+
+  Budget      Budget      @relation(fields: [budgetId], references: [id])
+  Category    Category    @relation(fields: [categoryId], references: [id])
+  BankAccount BankAccount @relation(fields: [bankAccountId], references: [id])
+
+  @@map("transactions")
+}
+
+model Category {
+  id        String          @id @default(uuid())
+  name      String
+  createdAt DateTime        @default(now()) @map("create_at")
+  updatedAt DateTime?       @updatedAt @map("updated_at")
+  budgetId  String
+  type      TypeTransaction @default(EXPENSES)
+
+  transactions  Transaction[]
+  subcategories SubCategory[]
+
+  Budget Budget @relation(fields: [budgetId], references: [id])
+
+  @@map("categories")
+}
+
+model SubCategory {
+  id         String    @id @default(uuid())
+  name       String
+  createdAt  DateTime  @default(now()) @map("create_at")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
+  categoryId String
+
+  Category Category @relation(fields: [categoryId], references: [id])
+
+  @@map("subcategories")
 }
