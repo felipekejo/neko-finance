@@ -1,27 +1,25 @@
 import { PaginationParams } from '@/core/repositories/pagination-params'
 import { Transaction } from '@/domain/entities/transaction'
 import { TransactionFilters, TransactionsRepository } from '@/domain/repositories/transaction-repository'
-import { Injectable } from '@nestjs/common'
+import { PrismaClient } from '@/generated/client'
 import { PrismaTransactionsMapper } from '../mappers/prisma-transactions-mapper'
-import { PrismaService } from '../prisma.service'
 
-@Injectable()
 export class PrismaTransactionsRepository implements TransactionsRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaClient) { }
   async findMany(
     filters: TransactionFilters,
     { page = 1, perPage = 10 }: PaginationParams,
   ): Promise<Transaction[]> {
     const where: any = {}
-      const pageNumber = Number(page) || 1
-  const perPageNumber = Number(perPage) || 10
+    const pageNumber = Number(page) || 1
+    const perPageNumber = Number(perPage) || 10
 
     if (filters.accountId) where.accountId = filters.accountId
     if (filters.categoryId) where.categoryId = filters.categoryId
     if (filters.budgetId) where.budgetId = filters.budgetId
     if (filters.type) where.type = filters.type
 
-   if (filters.dateFrom || filters.dateTo) {
+    if (filters.dateFrom || filters.dateTo) {
       where.createdAt = {}
 
       if (filters.dateFrom) {
@@ -32,7 +30,7 @@ export class PrismaTransactionsRepository implements TransactionsRepository {
       }
     }
 
-    
+
     const transactions = await this.prisma.transaction.findMany({
       where,
       orderBy: { createdAt: 'desc' },

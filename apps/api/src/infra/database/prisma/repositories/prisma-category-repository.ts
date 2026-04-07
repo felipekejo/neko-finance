@@ -1,12 +1,10 @@
 import { Category } from '@/domain/entities/category'
 import { CategoriesFilter, CategoriesRepository, type FindByNameProps } from '@/domain/repositories/category-repository'
-import { Injectable } from '@nestjs/common'
+import { PrismaClient } from '@/generated/client'
 import { PrismaCategoryMapper } from '../mappers/prisma-category-mapper'
-import { PrismaService } from '../prisma.service'
 
-@Injectable()
 export class PrismaCategoryRepository implements CategoriesRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaClient) { }
   async delete(category: Category) {
     const data = PrismaCategoryMapper.toPrisma(category)
     await this.prisma.category.delete({
@@ -46,7 +44,7 @@ export class PrismaCategoryRepository implements CategoriesRepository {
 
     return PrismaCategoryMapper.toDomain(category)
   }
-  async findMany(filters:CategoriesFilter,budgetId:string) {
+  async findMany(filters: CategoriesFilter, budgetId: string) {
     if (filters.type) {
       filters.type = filters.type.toUpperCase() as 'EXPENSES' | 'INCOMES'
     }
@@ -63,7 +61,7 @@ export class PrismaCategoryRepository implements CategoriesRepository {
     return categories.map(PrismaCategoryMapper.toDomain)
   }
 
-  async findByName({name, budgetId}: FindByNameProps) {
+  async findByName({ name, budgetId }: FindByNameProps) {
     const category = await this.prisma.category.findFirst({
       where: {
         name,

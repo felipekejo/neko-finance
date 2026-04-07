@@ -1,12 +1,10 @@
 import { Account } from '@/domain/entities/account'
 import { AccountsRepository, FindByNameProps } from '@/domain/repositories/account-repository'
-import { Injectable } from '@nestjs/common'
+import { PrismaClient } from '@/generated/client'
 import { PrismaAccountMapper } from '../mappers/prisma-accounts-mapper'
-import { PrismaService } from '../prisma.service'
 
-@Injectable()
 export class PrismaAccountsRepository implements AccountsRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaClient) { }
 
   async create(account: Account) {
     const data = PrismaAccountMapper.toPrisma(account)
@@ -49,7 +47,7 @@ export class PrismaAccountsRepository implements AccountsRepository {
       data,
     })
   }
-  async findMany(budgetId:string): Promise<Account[]> {
+  async findMany(budgetId: string): Promise<Account[]> {
     const accounts = await this.prisma.account.findMany({
       where: {
         budgetId,
@@ -62,7 +60,7 @@ export class PrismaAccountsRepository implements AccountsRepository {
     return accounts.map(PrismaAccountMapper.toDomain)
   }
 
-  async findByName({name, budgetId}: FindByNameProps) {
+  async findByName({ name, budgetId }: FindByNameProps) {
     const account = await this.prisma.account.findFirst({
       where: {
         name,

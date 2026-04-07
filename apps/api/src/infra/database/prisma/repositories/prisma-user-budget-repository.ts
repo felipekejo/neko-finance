@@ -1,12 +1,11 @@
-import type { UserBudget } from '@/domain/entities/user-budget'
+import { UserBudget } from '@/domain/entities/user-budget'
 import { UserBudgetRepository } from '@/domain/repositories/user-budget-repository'
-import { Injectable } from '@nestjs/common'
+import { PrismaClient } from '@/generated/client'
 import { PrismaUserBudgetMapper } from '../mappers/prisma-user-budget-mapper'
-import { PrismaService } from '../prisma.service'
 
-@Injectable()
+
 export class PrismaUserBudgetRepository implements UserBudgetRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaClient) { }
 
   async findByUserIdAndBudgetId(userId: string, budgetId: string) {
     const userBudget = await this.prisma.userBudget.findFirst({

@@ -1,13 +1,11 @@
-import { UsersRepository } from '@/domain/repositories/user-repository'
-import { Injectable } from '@nestjs/common'
-
 import { User } from '@/domain/entities/user'
+import { UsersRepository } from '@/domain/repositories/user-repository'
+import { PrismaClient } from '@/generated/client'
 import { PrismaUsersMapper } from '../mappers/prisma-users-mapper'
-import { PrismaService } from '../prisma.service'
 
-@Injectable()
+
 export class PrismaUsersRepository implements UsersRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaClient) { }
 
   async findById(id: string) {
     const user = await this.prisma.user.findUnique({

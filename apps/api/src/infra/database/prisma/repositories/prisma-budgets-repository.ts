@@ -1,6 +1,6 @@
 import { Budget } from '@/domain/entities/budget'
 import { BudgetsRepository } from '@/domain/repositories/budget-repository'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@/generated/client'
 import { PrismaBudgetMapper } from '../mappers/prisma-budget-mapper'
 
 export class PrismaBudgetsRepository implements BudgetsRepository {

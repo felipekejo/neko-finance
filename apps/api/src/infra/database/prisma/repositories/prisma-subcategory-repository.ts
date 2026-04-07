@@ -1,12 +1,10 @@
 import { Subcategory } from '@/domain/entities/subcategory'
 import { SubcategoriesRepository } from '@/domain/repositories/subcategory-repository'
-import { Injectable } from '@nestjs/common'
+import { PrismaClient } from '@/generated/client'
 import { PrismaSubcategoryMapper } from '../mappers/prisma-subcategory-mapper'
-import { PrismaService } from '../prisma.service'
 
-@Injectable()
 export class PrismaSubcategoriesRepository implements SubcategoriesRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaClient) { }
   async delete(subcategory: Subcategory) {
     const data = PrismaSubcategoryMapper.toPrisma(subcategory)
 
@@ -49,9 +47,9 @@ export class PrismaSubcategoriesRepository implements SubcategoriesRepository {
     })
   }
 
-  async findMany(categoryId: string){
-    const data =  await this.prisma.subCategory.findMany({
-      where:{
+  async findMany(categoryId: string) {
+    const data = await this.prisma.subCategory.findMany({
+      where: {
         categoryId,
       },
       orderBy: {
@@ -62,17 +60,17 @@ export class PrismaSubcategoriesRepository implements SubcategoriesRepository {
     return data.map(PrismaSubcategoryMapper.toDomain)
   }
 
-   async findByName(name: string) {
-      const category = await this.prisma.subCategory.findFirst({
-        where: {
-          name,
-        },
-      })
-  
-      if (!category) {
-        return null
-      }
-  
-      return PrismaSubcategoryMapper.toDomain(category)
+  async findByName(name: string) {
+    const category = await this.prisma.subCategory.findFirst({
+      where: {
+        name,
+      },
+    })
+
+    if (!category) {
+      return null
     }
+
+    return PrismaSubcategoryMapper.toDomain(category)
+  }
 }
