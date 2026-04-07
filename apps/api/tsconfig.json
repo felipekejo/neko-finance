@@ -3,7 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     }
   },
   "include": [
@@ -13,10 +15,10 @@
     "src/core/**/*.ts",
     "src/domain/**/*.ts",
     "src/lib/**/*.ts",
+    "src/infra/**/*.ts",
     "generated"
   ],
   "exclude": [
-    "src/infra/**",
     "**/*.spec.ts",
     "**/*.e2e-spec.ts",
     "src/**/*.js"

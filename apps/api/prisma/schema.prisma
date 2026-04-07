@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
-  // output   = "../../../node_modules/.prisma/client"
   output   = "../src/generated"
 }
 
@@ -17,11 +10,11 @@ datasource db {
 model User {
   id            String        @id @default(uuid(7))
   email         String        @unique
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
   name          String
   emailVerified Boolean       @default(false)
   image         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   sessions      Session[]
   accounts      Account[]
   userBudgets   UserBudget[]
@@ -33,15 +26,14 @@ model User {
 model Session {
   id        String   @id @default(uuid(7))
   expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  token     String   @unique
   ipAddress String?
   userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
@@ -50,8 +42,6 @@ model Account {
   id                    String    @id @default(uuid(7))
   accountId             String
   providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -61,6 +51,8 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("account")
@@ -79,16 +71,15 @@ model Verification {
 }
 
 model Budget {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid(7))
   name      String
-  createdAt DateTime  @default(now()) @map("create_at")
-  updatedAt DateTime? @updatedAt @map("updated_at")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   categories   Category[]
   transactions Transaction[]
   bankAccounts BankAccount[]
-
-  UserBudget UserBudget[]
+  userBudgets  UserBudget[]
 
   @@map("budgets")
 }
@@ -96,26 +87,24 @@ model Budget {
 model UserBudget {
   userId   String
   budgetId String
+  user     User   @relation(fields: [userId], references: [id])
+  budget   Budget @relation(fields: [budgetId], references: [id])
 
-  user   User   @relation(fields: [userId], references: [id])
-  budget Budget @relation(fields: [budgetId], references: [id])
-
-  @@id([userId, budgetId]) // Composite primary key for many-to-many relationship
+  @@id([userId, budgetId])
   @@map("user_budgets")
 }
 
 model BankAccount {
-  id           String        @id @default(uuid())
-  ownerId      String        @map("owner_id")
+  id           String        @id @default(uuid(7))
   name         String
   balance      Int           @default(0)
-  createdAt    DateTime      @default(now()) @map("create_at")
-  updatedAt    DateTime?     @updatedAt @map("updated_at")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  ownerId      String
   budgetId     String
   transactions Transaction[]
-
-  Budget Budget @relation(fields: [budgetId], references: [id])
-  owner  User   @relation(fields: [ownerId], references: [id])
+  budget       Budget        @relation(fields: [budgetId], references: [id])
+  owner        User          @relation(fields: [ownerId], references: [id])
 
   @@map("bank_accounts")
 }
@@ -126,50 +115,45 @@ enum TypeTransaction {
 }
 
 model Transaction {
-  id            String    @id @default(uuid())
+  id            String          @id @default(uuid(7))
   description   String
-  createdAt     DateTime  @default(now()) @map("create_at")
-  updatedAt     DateTime? @updatedAt @map("updated_at")
   amount        Int
+  date          DateTime
+  type          TypeTransaction
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   budgetId      String
   categoryId    String
-  subCategoryId String?
-  date          DateTime
   bankAccountId String
-
-  type TypeTransaction
-
-  Budget      Budget      @relation(fields: [budgetId], references: [id])
-  Category    Category    @relation(fields: [categoryId], references: [id])
-  BankAccount BankAccount @relation(fields: [bankAccountId], references: [id])
+  subCategoryId String?
+  budget        Budget          @relation(fields: [budgetId], references: [id])
+  category      Category        @relation(fields: [categoryId], references: [id])
+  bankAccount   BankAccount     @relation(fields: [bankAccountId], references: [id])
 
   @@map("transactions")
 }
 
 model Category {
-  id        String          @id @default(uuid())
-  name      String
-  createdAt DateTime        @default(now()) @map("create_at")
-  updatedAt DateTime?       @updatedAt @map("updated_at")
-  budgetId  String
-  type      TypeTransaction @default(EXPENSES)
-
+  id            String          @id @default(uuid(7))
+  name          String
+  type          TypeTransaction @default(EXPENSES)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  budgetId      String
+  budget        Budget          @relation(fields: [budgetId], references: [id])
   transactions  Transaction[]
   subcategories SubCategory[]
-
-  Budget Budget @relation(fields: [budgetId], references: [id])
 
   @@map("categories")
 }
 
 model SubCategory {
-  id         String    @id @default(uuid())
+  id         String   @id @default(uuid(7))
   name       String
-  createdAt  DateTime  @default(now()) @map("create_at")
-  updatedAt  DateTime? @updatedAt @map("updated_at")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   categoryId String
-
-  Category Category @relation(fields: [categoryId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
 
   @@map("subcategories")
 }
