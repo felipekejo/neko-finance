@@ -3,7 +3,7 @@ import { CreateBudgetUseCase } from '@/domain/use-cases/create-budget'
 import { PrismaBudgetsRepository } from '@/infra/database/prisma/repositories/prisma-budgets-repository'
 import { PrismaUserBudgetRepository } from '@/infra/database/prisma/repositories/prisma-user-budget-repository'
 import { prisma } from '@/lib/prisma'
-import { FastifyInstance } from 'fastify'
+import type { FastifyTypedInstance } from '@/utils/fastifyTypes'
 import { z } from 'zod'
 
 const createBudgetBodySchema = z.object({
@@ -12,8 +12,20 @@ const createBudgetBodySchema = z.object({
 
 type CreateBudgetBodySchema = z.infer<typeof createBudgetBodySchema>
 
-export async function createBudgetRoute(app: FastifyInstance) {
-  app.post<{ Body: CreateBudgetBodySchema }>('/budgets', async (request, reply) => {
+export async function createBudgetRoute(app: FastifyTypedInstance) {
+  app.post<{ Body: CreateBudgetBodySchema }>('/budgets', {
+    schema: {
+      description: 'Create a new budget',
+      body: createBudgetBodySchema,
+      tags: ['Budgets'],
+      response: {
+        201: {
+          description: 'Budget created successfully',
+        },
+
+      }
+    }
+  }, async (request, reply) => {
     const budgetsRepository = new PrismaBudgetsRepository(prisma)
     const userBudgetsRepository = new PrismaUserBudgetRepository(prisma)
     const createBudget = new CreateBudgetUseCase(budgetsRepository)
