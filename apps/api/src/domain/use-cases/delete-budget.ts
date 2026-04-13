@@ -18,7 +18,7 @@ export class DeleteBudgetUseCase {
   constructor(
     private budgetsRepository: BudgetsRepository,
     private userBudgetRepository: UserBudgetRepository,
-  ) {}
+  ) { }
 
   async execute({
     budgetId,
@@ -36,7 +36,7 @@ export class DeleteBudgetUseCase {
     if (!userBudget) {
       return left(new UnauthorizedError())
     }
-
+    await this.userBudgetRepository.delete(userId, budgetId)
     await this.budgetsRepository.delete(budget)
     return right({})
   }

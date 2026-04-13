@@ -2,9 +2,9 @@ import { GetBudgetByIdUseCase } from '@/domain/use-cases/get-budget-by-id'
 import { PrismaBudgetsRepository } from '@/infra/database/prisma/repositories/prisma-budgets-repository'
 import { BudgetPresenter } from '@/infra/http/presenters/budget-presenter'
 import { prisma } from '@/lib/prisma'
-import { FastifyInstance } from 'fastify'
+import type { FastifyTypedInstance } from '@/utils/fastifyTypes'
 
-export async function getBudgetByIdRoute(app: FastifyInstance) {
+export async function getBudgetByIdRoute(app: FastifyTypedInstance) {
   app.get<{ Params: { budgetId: string } }>('/budgets/:budgetId', async (request, reply) => {
     const budgetsRepository = new PrismaBudgetsRepository(prisma)
     const getBudgetById = new GetBudgetByIdUseCase(budgetsRepository)

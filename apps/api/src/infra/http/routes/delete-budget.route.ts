@@ -4,9 +4,9 @@ import { UnauthorizedError } from '@/domain/use-cases/errors/unauthorized-error'
 import { PrismaBudgetsRepository } from '@/infra/database/prisma/repositories/prisma-budgets-repository'
 import { PrismaUserBudgetRepository } from '@/infra/database/prisma/repositories/prisma-user-budget-repository'
 import { prisma } from '@/lib/prisma'
-import { FastifyInstance } from 'fastify'
+import type { FastifyTypedInstance } from '@/utils/fastifyTypes'
 
-export async function deleteBudgetRoute(app: FastifyInstance) {
+export async function deleteBudgetRoute(app: FastifyTypedInstance) {
   app.delete<{ Params: { budgetId: string } }>('/budgets/:budgetId', async (request, reply) => {
     const budgetsRepository = new PrismaBudgetsRepository(prisma)
     const userBudgetsRepository = new PrismaUserBudgetRepository(prisma)
