@@ -5,6 +5,7 @@ import fastify from "fastify";
 import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod';
 import { verifyAuth } from "./infra/http/middleware/verify-auth";
 import { authRoute } from "./infra/http/routes/auth.route";
+import { createAccountRoute } from "./infra/http/routes/create-account.route";
 import { createBudgetRoute } from "./infra/http/routes/create-budget.route";
 import { deleteBudgetRoute } from "./infra/http/routes/delete-budget.route";
 import { getBudgetByIdRoute } from "./infra/http/routes/get-budget-by-id.route";
@@ -34,6 +35,7 @@ app.register(authRoute)
 app.register(async (protectedApp) => {
   protectedApp.addHook('preHandler', verifyAuth)
 
+  protectedApp.register(createAccountRoute)
   protectedApp.register(createBudgetRoute)
   protectedApp.register(getBudgetByIdRoute)
   protectedApp.register(deleteBudgetRoute)

@@ -1,16 +1,13 @@
-import { InMemoryAccountsRepository } from 'test/repositories/in-memory-accounts-repository'
-import { AccountService } from '../service/account.service'
+import { InMemoryAccountsRepository } from '../../test/repositories/in-memory-accounts-repository'
 import { CreateAccountUseCase } from './create-account'
-    
-let accountService: AccountService
+
 let inMemoryAccountsRepository: InMemoryAccountsRepository
 let sut: CreateAccountUseCase
 
 describe('Create Account Use Case', () => {
   beforeEach(() => {
     inMemoryAccountsRepository = new InMemoryAccountsRepository()
-    accountService = new AccountService(inMemoryAccountsRepository)
-    sut = new CreateAccountUseCase(accountService)
+    sut = new CreateAccountUseCase(inMemoryAccountsRepository)
   })
 
   it('should be able to create a new account', async () => {

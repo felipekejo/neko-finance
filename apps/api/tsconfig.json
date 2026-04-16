@@ -2,10 +2,10 @@
   "extends": "@neko/tsconfig/node.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "types": ["vitest/globals"],
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"],
+      "test/*": ["test/*"]
     }
   },
   "include": [
@@ -17,11 +17,10 @@
     "src/domain/**/*.ts",
     "src/lib/**/*.ts",
     "src/infra/**/*.ts",
-    "generated"
+    "generated",
+    "test/**/*.ts"
   ],
   "exclude": [
-    "**/*.spec.ts",
-    "**/*.e2e-spec.ts",
     "src/**/*.js"
   ]
 }

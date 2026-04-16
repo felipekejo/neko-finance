@@ -1,7 +1,7 @@
 import { Either, right } from '@/core/either'
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { Account } from '../entities/account'
-import { AccountService } from '../service/account.service'
-
+import type { AccountsRepository } from '../repositories/account-repository'
 
 interface CreateAccountUseCaseRequest {
   ownerId: string
@@ -18,7 +18,7 @@ type CreateAccountUseCaseResponse = Either<
 >
 
 export class CreateAccountUseCase {
-  constructor(private accountService: AccountService) {}
+  constructor(private accountsRepository: AccountsRepository) {}
 
   async execute({
     name,
@@ -26,16 +26,15 @@ export class CreateAccountUseCase {
     budgetId,
     balance,
   }: CreateAccountUseCaseRequest): Promise<CreateAccountUseCaseResponse> {
-    const result = await this.accountService.createAccount({
+    const account = Account.create({
       name,
-      ownerId,
-      budgetId,
+      ownerId: new UniqueEntityID(ownerId),
+      budgetId: new UniqueEntityID(budgetId),
       balance,
     })
-    if (result.isLeft()) {
-      return result
-    }
 
-    return right({ account:  result.value.account })
+    await this.accountsRepository.create(account)
+
+    return right({ account })
   }
 }
