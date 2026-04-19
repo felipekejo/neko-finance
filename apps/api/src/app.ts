@@ -7,7 +7,11 @@ import { verifyAuth } from "./infra/http/middleware/verify-auth";
 import { authRoute } from "./infra/http/routes/auth.route";
 import { createAccountRoute } from "./infra/http/routes/create-account.route";
 import { createBudgetRoute } from "./infra/http/routes/create-budget.route";
+import { deleteAccountRoute } from "./infra/http/routes/delete-account.route";
 import { deleteBudgetRoute } from "./infra/http/routes/delete-budget.route";
+import { editAccountRoute } from "./infra/http/routes/edit-account.route";
+import { fetchAccountsRoute } from "./infra/http/routes/fetch-accounts.route";
+import { getAccountByIdRoute } from "./infra/http/routes/get-account-by-id.route";
 import { getBudgetByIdRoute } from "./infra/http/routes/get-budget-by-id.route";
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>()
@@ -36,6 +40,10 @@ app.register(async (protectedApp) => {
   protectedApp.addHook('preHandler', verifyAuth)
 
   protectedApp.register(createAccountRoute)
+  protectedApp.register(deleteAccountRoute)
+  protectedApp.register(editAccountRoute)
+  protectedApp.register(fetchAccountsRoute)
+  protectedApp.register(getAccountByIdRoute)
   protectedApp.register(createBudgetRoute)
   protectedApp.register(getBudgetByIdRoute)
   protectedApp.register(deleteBudgetRoute)

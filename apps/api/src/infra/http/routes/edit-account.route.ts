@@ -1,31 +1,38 @@
 import { ResourceNotFoundError } from '@/domain/use-cases/errors/resource-not-found-error'
 import { UnauthorizedError } from '@/domain/use-cases/errors/unauthorized-error'
-import { makeDeleteBudgetUseCase } from '@/infra/factories/budget.factories'
+import { makeEditAccountUseCase } from '@/infra/factories/account.factories'
 import type { FastifyTypedInstance } from '@/utils/fastifyTypes'
 import { z } from 'zod'
 
 const paramsSchema = z.object({
-  budgetId: z.string(),
+  accountId: z.string(),
 })
 
-export async function deleteBudgetRoute(app: FastifyTypedInstance) {
-  app.delete('/budgets/:budgetId', {
+const bodySchema = z.object({
+  name: z.string(),
+  balance: z.number(),
+})
+
+export async function editAccountRoute(app: FastifyTypedInstance) {
+  app.put('/accounts/:accountId', {
     schema: {
-      description: 'Delete a budget',
-      tags: ['Budgets'],
+      description: 'Edit an account',
+      tags: ['Accounts'],
       params: paramsSchema,
+      body: bodySchema,
       response: {
-        204: { description: 'Budget deleted successfully' },
+        204: { description: 'Account updated successfully' },
         400: { description: 'Bad Request' },
         403: { description: 'Forbidden' },
-        404: { description: 'Budget not found' },
+        404: { description: 'Account not found' },
       },
     },
   }, async (request, reply) => {
-    const { budgetId } = request.params
-    const userId = request.user.sub
+    const { accountId } = request.params
+    const { name, balance } = request.body
+    const ownerId = request.user.sub
 
-    const result = await makeDeleteBudgetUseCase().execute({ budgetId, userId })
+    const result = await makeEditAccountUseCase().execute({ accountId, ownerId, name, balance })
 
     if (result.isLeft()) {
       const error = result.value
