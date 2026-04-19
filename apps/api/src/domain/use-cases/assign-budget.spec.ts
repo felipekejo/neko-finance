@@ -1,10 +1,10 @@
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
-import { FakeHasher } from 'test/cryptography/fake-hash'
-import { makeBudget } from 'test/factories/make-budget'
-import { makeUser } from 'test/factories/make-user'
-import { InMemoryBudgetsRepository } from 'test/repositories/in-memory-budgets-repository'
-import { InMemoryUserBudgetRepository } from 'test/repositories/in-memory-user-budget-repository'
-import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository'
+import { FakeHasher } from '@/test/cryptography/fake-hash'
+import { makeBudget } from '@/test/factories/make-budget'
+import { makeUser } from '@/test/factories/make-user'
+import { InMemoryBudgetsRepository } from '@/test/repositories/in-memory-budgets-repository'
+import { InMemoryUserBudgetRepository } from '@/test/repositories/in-memory-user-budget-repository'
+import { InMemoryUsersRepository } from '@/test/repositories/in-memory-users-repository'
 import { AssignBudgetUseCase } from './assign-budget'
 
 let inMemoryUserBudgetRepository: InMemoryUserBudgetRepository
@@ -17,12 +17,10 @@ describe('Assign Budget Use Case', () => {
   beforeEach(() => {
     inMemoryUserBudgetRepository = new InMemoryUserBudgetRepository()
     inMemoryBudgetsRepository = new InMemoryBudgetsRepository()
-    inMemoryUsersRepository = new InMemoryUsersRepository()
     fakeHasher = new FakeHasher()
 
     sut = new AssignBudgetUseCase(
       inMemoryBudgetsRepository,
-      inMemoryUsersRepository,
       inMemoryUserBudgetRepository,
     )
   })
@@ -43,7 +41,6 @@ describe('Assign Budget Use Case', () => {
       new UniqueEntityID('budget-01'),
     )
 
-    await inMemoryUsersRepository.create(user)
     await inMemoryBudgetsRepository.create(budget)
     const result = await sut.execute({
       userId: 'user-01',
