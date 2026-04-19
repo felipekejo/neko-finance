@@ -8,7 +8,7 @@ import { CategoryService } from '../service/category.service'
 import { SubcategoryService } from '../service/subcategory.service'
 import { TransactionService } from '../service/transaction.service'
 import { ImportTransactionsUseCase } from './import-transactions'
-    
+
 let accountService: AccountService
 let categoryService: CategoryService
 let transactionService: TransactionService
@@ -46,18 +46,17 @@ describe('Import Transaction Use Case', () => {
     Lunch,15,2023-10-01,Food,Wallet,EXPENSES,NewSubcategory`
 
 
-     const result = await sut.execute({
+    const result = await sut.execute({
       budgetId: 'budget-1',
       ownerId: 'user-1',
       csvBuffer: Buffer.from(csvData),
     })
-    console.log('felipe',inMemoryAccountsRepository.items)
     expect(result.isRight()).toBe(true)
     expect(inMemoryAccountsRepository.items[0].name).toEqual(
       'Wallet'
     )
     expect(inMemoryAccountsRepository.items[0].balance).toEqual(
-      15
+      -15
     )
     expect(inMemoryCategoriesRepository.items[0].name).toEqual(
       'Food'
