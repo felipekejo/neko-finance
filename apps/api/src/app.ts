@@ -13,6 +13,11 @@ import { editAccountRoute } from "./infra/http/routes/edit-account.route";
 import { fetchAccountsRoute } from "./infra/http/routes/fetch-accounts.route";
 import { getAccountByIdRoute } from "./infra/http/routes/get-account-by-id.route";
 import { getBudgetByIdRoute } from "./infra/http/routes/get-budget-by-id.route";
+import { createTransactionRoute } from "./infra/http/routes/create-transaction.route";
+import { deleteTransactionRoute } from "./infra/http/routes/delete-transaction.route";
+import { editTransactionRoute } from "./infra/http/routes/edit-transaction.route";
+import { fetchTransactionsRoute } from "./infra/http/routes/fetch-transactions.route";
+import { getTransactionByIdRoute } from "./infra/http/routes/get-transaction-by-id.route";
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -47,4 +52,9 @@ app.register(async (protectedApp) => {
   protectedApp.register(createBudgetRoute)
   protectedApp.register(getBudgetByIdRoute)
   protectedApp.register(deleteBudgetRoute)
+  protectedApp.register(createTransactionRoute)
+  protectedApp.register(deleteTransactionRoute)
+  protectedApp.register(editTransactionRoute)
+  protectedApp.register(fetchTransactionsRoute)
+  protectedApp.register(getTransactionByIdRoute)
 })
