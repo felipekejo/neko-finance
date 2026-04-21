@@ -1,6 +1,6 @@
 import { PaginationParams } from '@/core/repositories/pagination-params'
 import { Transaction } from '@/domain/entities/transaction'
-import { TransactionFilters, TransactionsRepository } from '@/domain/repositories/transaction-repository'
+import { CategoryAmountGroup, TransactionFilters, TransactionsRepository } from '@/domain/repositories/transaction-repository'
 import { PrismaClient } from '@/generated/client'
 import { PrismaTransactionsMapper } from '../mappers/prisma-transactions-mapper'
 
@@ -116,6 +116,32 @@ export class PrismaTransactionsRepository implements TransactionsRepository {
     })
 
     return result._sum.amount || 0
+  }
+
+  async groupAmountByCategory(filters: TransactionFilters): Promise<CategoryAmountGroup[]> {
+    const where: any = {}
+
+    if (filters.accountId) where.accountId = filters.accountId
+    if (filters.categoryId) where.categoryId = filters.categoryId
+    if (filters.budgetId) where.budgetId = filters.budgetId
+    if (filters.type) where.type = filters.type
+
+    if (filters.dateFrom || filters.dateTo) {
+      where.date = {}
+      if (filters.dateFrom) where.date.gte = filters.dateFrom
+      if (filters.dateTo) where.date.lte = filters.dateTo
+    }
+
+    const groups = await this.prisma.transaction.groupBy({
+      by: ['categoryId'],
+      _sum: { amount: true },
+      where,
+    })
+
+    return groups.map((g) => ({
+      categoryId: g.categoryId,
+      total: g._sum.amount ?? 0,
+    }))
   }
 
   async save(transaction: Transaction) {

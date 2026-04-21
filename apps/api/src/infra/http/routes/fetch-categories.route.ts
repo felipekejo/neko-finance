@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 const querySchema = z.object({
   budgetId: z.string().uuid(),
+  type: z.enum(['INCOMES', 'EXPENSES']).optional(),
 })
 
 export async function fetchCategoriesRoute(app: FastifyTypedInstance) {
@@ -19,9 +20,9 @@ export async function fetchCategoriesRoute(app: FastifyTypedInstance) {
       },
     },
   }, async (request, reply) => {
-    const { budgetId } = request.query
+    const { budgetId, type } = request.query
 
-    const result = await makeFetchCategoriesUseCase().execute({ budgetId })
+    const result = await makeFetchCategoriesUseCase().execute({ budgetId, type })
 
     if (result.isLeft()) {
       return reply.status(404).send({ error: 'Not Found' })

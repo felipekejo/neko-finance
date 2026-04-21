@@ -18,6 +18,7 @@ import { deleteTransactionRoute } from "./infra/http/routes/delete-transaction.r
 import { editTransactionRoute } from "./infra/http/routes/edit-transaction.route";
 import { fetchTransactionsRoute } from "./infra/http/routes/fetch-transactions.route";
 import { getTransactionByIdRoute } from "./infra/http/routes/get-transaction-by-id.route";
+import { getTransactionsSummaryRoute } from "./infra/http/routes/get-transactions-summary.route";
 import { createCategoryRoute } from "./infra/http/routes/create-category.route";
 import { deleteCategoryRoute } from "./infra/http/routes/delete-category.route";
 import { editCategoryRoute } from "./infra/http/routes/edit-category.route";
@@ -67,6 +68,7 @@ app.register(async (protectedApp) => {
   protectedApp.register(editTransactionRoute)
   protectedApp.register(fetchTransactionsRoute)
   protectedApp.register(getTransactionByIdRoute)
+  protectedApp.register(getTransactionsSummaryRoute)
   protectedApp.register(createCategoryRoute)
   protectedApp.register(deleteCategoryRoute)
   protectedApp.register(editCategoryRoute)
