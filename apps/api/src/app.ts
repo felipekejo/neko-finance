@@ -18,6 +18,16 @@ import { deleteTransactionRoute } from "./infra/http/routes/delete-transaction.r
 import { editTransactionRoute } from "./infra/http/routes/edit-transaction.route";
 import { fetchTransactionsRoute } from "./infra/http/routes/fetch-transactions.route";
 import { getTransactionByIdRoute } from "./infra/http/routes/get-transaction-by-id.route";
+import { createCategoryRoute } from "./infra/http/routes/create-category.route";
+import { deleteCategoryRoute } from "./infra/http/routes/delete-category.route";
+import { editCategoryRoute } from "./infra/http/routes/edit-category.route";
+import { fetchCategoriesRoute } from "./infra/http/routes/fetch-categories.route";
+import { getCategoryByIdRoute } from "./infra/http/routes/get-category-by-id.route";
+import { createSubcategoryRoute } from "./infra/http/routes/create-subcategory.route";
+import { deleteSubcategoryRoute } from "./infra/http/routes/delete-subcategory.route";
+import { editSubcategoryRoute } from "./infra/http/routes/edit-subcategory.route";
+import { fetchSubcategoriesRoute } from "./infra/http/routes/fetch-subcategories.route";
+import { getSubcategoryByIdRoute } from "./infra/http/routes/get-subcategory-by-id.route";
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -57,4 +67,14 @@ app.register(async (protectedApp) => {
   protectedApp.register(editTransactionRoute)
   protectedApp.register(fetchTransactionsRoute)
   protectedApp.register(getTransactionByIdRoute)
+  protectedApp.register(createCategoryRoute)
+  protectedApp.register(deleteCategoryRoute)
+  protectedApp.register(editCategoryRoute)
+  protectedApp.register(fetchCategoriesRoute)
+  protectedApp.register(getCategoryByIdRoute)
+  protectedApp.register(createSubcategoryRoute)
+  protectedApp.register(deleteSubcategoryRoute)
+  protectedApp.register(editSubcategoryRoute)
+  protectedApp.register(fetchSubcategoriesRoute)
+  protectedApp.register(getSubcategoryByIdRoute)
 })
