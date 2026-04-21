@@ -16,6 +16,7 @@ export class PrismaTransactionsRepository implements TransactionsRepository {
 
     if (filters.accountId) where.accountId = filters.accountId
     if (filters.categoryId) where.categoryId = filters.categoryId
+    if (filters.subcategoryId) where.subcategoryId = filters.subcategoryId
     if (filters.budgetId) where.budgetId = filters.budgetId
     if (filters.type) where.type = filters.type
 
@@ -50,6 +51,24 @@ export class PrismaTransactionsRepository implements TransactionsRepository {
     })
 
     return transactions.map(PrismaTransactionsMapper.toDomain)
+  }
+
+  async countMany(filters: TransactionFilters): Promise<number> {
+    const where: any = {}
+
+    if (filters.accountId) where.accountId = filters.accountId
+    if (filters.categoryId) where.categoryId = filters.categoryId
+    if (filters.subcategoryId) where.subcategoryId = filters.subcategoryId
+    if (filters.budgetId) where.budgetId = filters.budgetId
+    if (filters.type) where.type = filters.type
+
+    if (filters.dateFrom || filters.dateTo) {
+      where.date = {}
+      if (filters.dateFrom) where.date.gte = filters.dateFrom
+      if (filters.dateTo) where.date.lte = filters.dateTo
+    }
+
+    return this.prisma.transaction.count({ where })
   }
 
   async create(transaction: Transaction) {
@@ -101,6 +120,7 @@ export class PrismaTransactionsRepository implements TransactionsRepository {
 
     if (filters.accountId) where.accountId = filters.accountId
     if (filters.categoryId) where.categoryId = filters.categoryId
+    if (filters.subcategoryId) where.subcategoryId = filters.subcategoryId
     if (filters.budgetId) where.budgetId = filters.budgetId
     if (filters.type) where.type = filters.type
 
@@ -123,6 +143,7 @@ export class PrismaTransactionsRepository implements TransactionsRepository {
 
     if (filters.accountId) where.accountId = filters.accountId
     if (filters.categoryId) where.categoryId = filters.categoryId
+    if (filters.subcategoryId) where.subcategoryId = filters.subcategoryId
     if (filters.budgetId) where.budgetId = filters.budgetId
     if (filters.type) where.type = filters.type
 

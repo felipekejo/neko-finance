@@ -7,6 +7,7 @@ const querySchema = z.object({
   budgetId: z.string().uuid().optional(),
   accountId: z.string().uuid().optional(),
   categoryId: z.string().uuid().optional(),
+  subcategoryId: z.string().uuid().optional(),
   type: z.enum(['INCOMES', 'EXPENSES']).optional(),
   month: z.coerce.number().int().min(1).max(12).optional(),
   year: z.coerce.number().int().optional(),
@@ -26,10 +27,10 @@ export async function fetchTransactionsRoute(app: FastifyTypedInstance) {
       },
     },
   }, async (request, reply) => {
-    const { budgetId, accountId, categoryId, type, month, year, page, perPage } = request.query
+    const { budgetId, accountId, categoryId, subcategoryId, type, month, year, page, perPage } = request.query
 
     const result = await makeFetchTransactionsUseCase().execute({
-      filters: { budgetId, accountId, categoryId, type, month, year },
+      filters: { budgetId, accountId, categoryId, subcategoryId, type, month, year },
       pagination: { page, perPage },
     })
 
@@ -37,6 +38,15 @@ export async function fetchTransactionsRoute(app: FastifyTypedInstance) {
       return reply.status(404).send({ error: 'Not Found' })
     }
 
-    return reply.status(200).send(result.value.transactions.map(TransactionPresenter.toHTTP))
+    const { transactions, total } = result.value
+    const totalPages = Math.ceil(total / perPage)
+
+    return reply.status(200).send({
+      data: transactions.map(TransactionPresenter.toHTTP),
+      total,
+      page,
+      perPage,
+      totalPages,
+    })
   })
 }

@@ -15,6 +15,7 @@ interface FetchTransactionsRequest {
 }
 type FetchTransactionsUseCaseResponse = Either<ResourceNotFoundError, {
   transactions: Transaction[]
+  total: number
 }>;
 
 export class FetchTransactionsUseCase {
@@ -37,11 +38,15 @@ export class FetchTransactionsUseCase {
       delete (parsedFilters as any).year
     }
 
-    const transactions = await this.transactionsRepository.findMany(parsedFilters, pagination)
+    const [transactions, total] = await Promise.all([
+      this.transactionsRepository.findMany(parsedFilters, pagination),
+      this.transactionsRepository.countMany(parsedFilters),
+    ])
 
-      if(transactions.length === 0 ){
-          return left(new ResourceNotFoundError())
-        }
-    return right({transactions})
+    if (transactions.length === 0) {
+      return left(new ResourceNotFoundError())
+    }
+
+    return right({ transactions, total })
   }
 }

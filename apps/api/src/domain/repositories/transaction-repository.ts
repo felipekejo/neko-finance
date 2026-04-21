@@ -4,6 +4,7 @@ import { Transaction } from '../entities/transaction'
 export interface TransactionFilters {
   accountId?: string
   categoryId?: string
+  subcategoryId?: string
   budgetId?: string
   type?: 'INCOMES' | 'EXPENSES'
   dateFrom?: Date
@@ -19,6 +20,7 @@ export abstract class TransactionsRepository {
   abstract create(transaction: Transaction): Promise<void>
   abstract findById(id: string): Promise<Transaction | null>
   abstract findMany(filters: TransactionFilters, pagination?: PaginationParams): Promise<Transaction[]>
+  abstract countMany(filters: TransactionFilters): Promise<number>
   abstract sumAmountBy(filters: Omit<TransactionFilters, 'date'>): Promise<number>
   abstract groupAmountByCategory(filters: TransactionFilters): Promise<CategoryAmountGroup[]>
   abstract save(transaction: Transaction): Promise<void>

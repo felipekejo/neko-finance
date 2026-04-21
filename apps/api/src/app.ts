@@ -1,4 +1,5 @@
 import fastifyCors from "@fastify/cors";
+import fastifyMultipart from "@fastify/multipart";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastify from "fastify";
@@ -19,6 +20,9 @@ import { editTransactionRoute } from "./infra/http/routes/edit-transaction.route
 import { fetchTransactionsRoute } from "./infra/http/routes/fetch-transactions.route";
 import { getTransactionByIdRoute } from "./infra/http/routes/get-transaction-by-id.route";
 import { getTransactionsSummaryRoute } from "./infra/http/routes/get-transactions-summary.route";
+import { getTransactionsEvolutionRoute } from "./infra/http/routes/get-transactions-evolution.route";
+import { importTransactionsRoute } from "./infra/http/routes/import-transactions.route";
+import { assignBudgetRoute } from "./infra/http/routes/assign-budget.route";
 import { createCategoryRoute } from "./infra/http/routes/create-category.route";
 import { deleteCategoryRoute } from "./infra/http/routes/delete-category.route";
 import { editCategoryRoute } from "./infra/http/routes/edit-category.route";
@@ -36,6 +40,7 @@ app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
 
 app.register(fastifyCors)
+app.register(fastifyMultipart)
 app.register(fastifySwagger, {
   openapi: {
     info: {
@@ -69,6 +74,9 @@ app.register(async (protectedApp) => {
   protectedApp.register(fetchTransactionsRoute)
   protectedApp.register(getTransactionByIdRoute)
   protectedApp.register(getTransactionsSummaryRoute)
+  protectedApp.register(getTransactionsEvolutionRoute)
+  protectedApp.register(importTransactionsRoute)
+  protectedApp.register(assignBudgetRoute)
   protectedApp.register(createCategoryRoute)
   protectedApp.register(deleteCategoryRoute)
   protectedApp.register(editCategoryRoute)

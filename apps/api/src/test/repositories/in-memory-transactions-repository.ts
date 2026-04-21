@@ -1,6 +1,6 @@
 import { PaginationParams } from '@/core/repositories/pagination-params'
 import { Transaction } from '@/domain/entities/transaction'
-import { TransactionsRepository, type TransactionFilters } from '@/domain/repositories/transaction-repository'
+import { CategoryAmountGroup, TransactionsRepository, type TransactionFilters } from '@/domain/repositories/transaction-repository'
 
 export class InMemoryTransactionsRepository implements TransactionsRepository {
   public items: Transaction[] = []
@@ -76,6 +76,39 @@ export class InMemoryTransactionsRepository implements TransactionsRepository {
     }
 
     return transaction
+  }
+
+  async countMany(filters: TransactionFilters): Promise<number> {
+    return this.items.filter((transaction) => {
+      let matches = true
+      if (filters.accountId) matches = matches && transaction.accountId.toString() === filters.accountId
+      if (filters.categoryId) matches = matches && transaction.categoryId.toString() === filters.categoryId
+      if (filters.budgetId) matches = matches && transaction.budgetId.toString() === filters.budgetId
+      if (filters.type) matches = matches && transaction.type === filters.type
+      if (filters.dateFrom) matches = matches && transaction.date >= filters.dateFrom
+      if (filters.dateTo) matches = matches && transaction.date <= filters.dateTo
+      return matches
+    }).length
+  }
+
+  async groupAmountByCategory(filters: TransactionFilters): Promise<CategoryAmountGroup[]> {
+    const filtered = this.items.filter((transaction) => {
+      let matches = true
+      if (filters.accountId) matches = matches && transaction.accountId.toString() === filters.accountId
+      if (filters.budgetId) matches = matches && transaction.budgetId.toString() === filters.budgetId
+      if (filters.type) matches = matches && transaction.type === filters.type
+      if (filters.dateFrom) matches = matches && transaction.date >= filters.dateFrom
+      if (filters.dateTo) matches = matches && transaction.date <= filters.dateTo
+      return matches
+    })
+
+    const groups = new Map<string, number>()
+    for (const t of filtered) {
+      const key = t.categoryId.toString()
+      groups.set(key, (groups.get(key) ?? 0) + t.amount)
+    }
+
+    return Array.from(groups.entries()).map(([categoryId, total]) => ({ categoryId, total }))
   }
 
   async findManyRecent({ page }: PaginationParams) {
