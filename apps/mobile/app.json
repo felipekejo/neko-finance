@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Neko Finance",
+    "slug": "neko-finance",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "neko-finance",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.neko.finance"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.neko.finance"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
