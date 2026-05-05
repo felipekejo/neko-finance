@@ -1,27 +1,40 @@
-
 import { Either, left, right } from '@/core/either'
 import { PaginationParams } from '@/core/repositories/pagination-params'
 
 import { Transaction } from '../entities/transaction'
 import { TransactionFilters, TransactionsRepository } from '../repositories/transaction-repository'
+import { UserBudgetRepository } from '../repositories/user-budget-repository'
 import { ResourceNotFoundError } from './errors/resource-not-found-error'
+import { UnauthorizedError } from './errors/unauthorized-error'
 
 interface FetchTransactionsRequest {
+  userId: string
   filters: TransactionFilters & {
     year?: number
     month?: number
   }
   pagination?: PaginationParams
 }
-type FetchTransactionsUseCaseResponse = Either<ResourceNotFoundError, {
+
+type FetchTransactionsUseCaseResponse = Either<ResourceNotFoundError | UnauthorizedError, {
   transactions: Transaction[]
   total: number
 }>;
 
 export class FetchTransactionsUseCase {
-  constructor(private transactionsRepository: TransactionsRepository) {}
+  constructor(
+    private transactionsRepository: TransactionsRepository,
+    private userBudgetRepository: UserBudgetRepository,
+  ) {}
 
-  async execute({ filters, pagination }: FetchTransactionsRequest): Promise<FetchTransactionsUseCaseResponse> {
+  async execute({ userId, filters, pagination }: FetchTransactionsRequest): Promise<FetchTransactionsUseCaseResponse> {
+    if (filters.budgetId) {
+      const userBudget = await this.userBudgetRepository.findByUserIdAndBudgetId(userId, filters.budgetId)
+      if (!userBudget) {
+        return left(new UnauthorizedError())
+      }
+    }
+
     let parsedFilters: TransactionFilters = { ...filters }
 
     if (filters.month && filters.year) {

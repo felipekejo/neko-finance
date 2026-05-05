@@ -26,9 +26,14 @@ function accountsRepository() {
   return new PrismaAccountsRepository(prisma)
 }
 
+function userBudgetRepository() {
+  return new PrismaUserBudgetRepository(prisma)
+}
+
 export function makeCreateTransactionUseCase() {
   return new CreateTransactionUseCase(
     new TransactionService(transactionsRepository(), accountsRepository()),
+    userBudgetRepository(),
   )
 }
 
@@ -36,7 +41,7 @@ export function makeDeleteTransactionUseCase() {
   return new DeleteTransactionUseCase(
     transactionsRepository(),
     new PrismaBudgetsRepository(prisma),
-    new PrismaUserBudgetRepository(prisma),
+    userBudgetRepository(),
   )
 }
 
@@ -45,22 +50,23 @@ export function makeEditTransactionUseCase() {
 }
 
 export function makeFetchTransactionsUseCase() {
-  return new FetchTransactionsUseCase(transactionsRepository())
+  return new FetchTransactionsUseCase(transactionsRepository(), userBudgetRepository())
 }
 
 export function makeGetTransactionByIdUseCase() {
-  return new GetTransactionByIdUseCase(transactionsRepository())
+  return new GetTransactionByIdUseCase(transactionsRepository(), userBudgetRepository())
 }
 
 export function makeGetTransactionsSummaryUseCase() {
   return new GetTransactionsSummaryUseCase(
     transactionsRepository(),
     new PrismaCategoryRepository(prisma),
+    userBudgetRepository(),
   )
 }
 
 export function makeGetTransactionsEvolutionUseCase() {
-  return new GetTransactionsEvolutionUseCase(transactionsRepository())
+  return new GetTransactionsEvolutionUseCase(transactionsRepository(), userBudgetRepository())
 }
 
 export function makeImportTransactionsUseCase() {
@@ -76,5 +82,6 @@ export function makeImportTransactionsUseCase() {
     accountsRepo,
     categoriesRepo,
     subcategoriesRepo,
+    userBudgetRepository(),
   )
 }

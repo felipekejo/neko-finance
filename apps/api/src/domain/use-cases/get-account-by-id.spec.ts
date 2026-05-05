@@ -4,6 +4,7 @@ import { GetAccountByIdUseCase } from './get-account-by-id'
 
 let inMemoryAccountsRepository: InMemoryAccountsRepository
 let sut: GetAccountByIdUseCase
+
 describe('Get Account by Id Use Case', () => {
   beforeEach(() => {
     inMemoryAccountsRepository = new InMemoryAccountsRepository()
@@ -16,9 +17,11 @@ describe('Get Account by Id Use Case', () => {
 
     const result = await sut.execute({
       id: newAccount.id.toValue(),
+      userId: newAccount.ownerId.toValue(),
     })
 
     expect(result.isRight()).toBe(true)
-    expect(result.value?.account.id).toEqual(newAccount.id)
+    if (!result.isRight()) throw result.value
+    expect(result.value.account.id).toEqual(newAccount.id)
   })
 })

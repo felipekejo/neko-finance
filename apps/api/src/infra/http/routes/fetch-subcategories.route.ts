@@ -1,3 +1,4 @@
+import { UnauthorizedError } from '@/domain/use-cases/errors/unauthorized-error'
 import { makeFetchSubcategoriesUseCase } from '@/infra/factories/subcategory.factories'
 import { SubcategoryPresenter } from '@/infra/http/presenters/subcategory-presenter'
 import type { FastifyTypedInstance } from '@/utils/fastifyTypes'
@@ -15,15 +16,20 @@ export async function fetchSubcategoriesRoute(app: FastifyTypedInstance) {
       querystring: querySchema,
       response: {
         200: { description: 'Subcategories fetched successfully' },
+        403: { description: 'Forbidden' },
         404: { description: 'No subcategories found' },
       },
     },
   }, async (request, reply) => {
     const { categoryId } = request.query
+    const userId = request.user.sub
 
-    const result = await makeFetchSubcategoriesUseCase().execute({ categoryId })
+    const result = await makeFetchSubcategoriesUseCase().execute({ categoryId, userId })
 
     if (result.isLeft()) {
+      if (result.value instanceof UnauthorizedError) {
+        return reply.status(403).send({ error: 'Forbidden' })
+      }
       return reply.status(404).send({ error: 'Not Found' })
     }
 

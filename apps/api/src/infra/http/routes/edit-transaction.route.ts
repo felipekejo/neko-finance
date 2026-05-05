@@ -1,3 +1,4 @@
+import { UnauthorizedError } from '@/domain/use-cases/errors/unauthorized-error'
 import { makeEditTransactionUseCase } from '@/infra/factories/transaction.factories'
 import type { FastifyTypedInstance } from '@/utils/fastifyTypes'
 import { z } from 'zod'
@@ -25,7 +26,7 @@ export async function editTransactionRoute(app: FastifyTypedInstance) {
       response: {
         204: { description: 'Transaction updated successfully' },
         400: { description: 'Bad Request' },
-        401: { description: 'Unauthorized' },
+        403: { description: 'Forbidden' },
         404: { description: 'Transaction not found' },
       },
     },
@@ -47,8 +48,8 @@ export async function editTransactionRoute(app: FastifyTypedInstance) {
 
     if (result.isLeft()) {
       const error = result.value
-      if (error.constructor.name === 'UnauthorizedError') {
-        return reply.status(401).send({ error: 'Unauthorized' })
+      if (error instanceof UnauthorizedError) {
+        return reply.status(403).send({ error: 'Forbidden' })
       }
       return reply.status(404).send({ error: 'Not Found' })
     }

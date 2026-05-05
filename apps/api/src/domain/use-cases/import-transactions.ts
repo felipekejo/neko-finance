@@ -1,13 +1,15 @@
-import { right } from '@/core/either'
+import { Either, left, right } from '@/core/either'
 import { Transaction } from '@/domain/entities/transaction'
 import { parse } from 'csv-parse/sync'
 import { AccountsRepository } from '../repositories/account-repository'
 import { CategoriesRepository } from '../repositories/category-repository'
 import { SubcategoriesRepository } from '../repositories/subcategory-repository'
+import { UserBudgetRepository } from '../repositories/user-budget-repository'
 import { AccountService } from '../service/account.service'
 import { CategoryService } from '../service/category.service'
 import { SubcategoryService } from '../service/subcategory.service'
 import { TransactionService } from '../service/transaction.service'
+import { UnauthorizedError } from './errors/unauthorized-error'
 
 interface ImportTransactionsRequest {
   budgetId: string
@@ -34,11 +36,16 @@ export class ImportTransactionsUseCase {
     private accountsRepository: AccountsRepository,
     private categoriesRepository: CategoriesRepository,
     private subcategoriesRepository: SubcategoriesRepository,
+    private userBudgetRepository: UserBudgetRepository,
   ) {}
 
-  async execute({ budgetId, ownerId, csvBuffer }: ImportTransactionsRequest) {
-    const results: Transaction[] = []
+  async execute({ budgetId, ownerId, csvBuffer }: ImportTransactionsRequest): Promise<Either<UnauthorizedError, { imported: number }>> {
+    const userBudget = await this.userBudgetRepository.findByUserIdAndBudgetId(ownerId, budgetId)
+    if (!userBudget) {
+      return left(new UnauthorizedError())
+    }
 
+    const results: Transaction[] = []
     const rows: csvRow[] = await this.parseCsv(csvBuffer)
 
     for (const row of rows) {
@@ -46,52 +53,44 @@ export class ImportTransactionsUseCase {
       let account
       let subcategory
 
-        category = await this.categoriesRepository.findByName({
+      category = await this.categoriesRepository.findByName({
+        name: row.category,
+        budgetId: budgetId,
+      })
+      if (!category) {
+        const createdCategory = await this.categoryService.create({
           name: row.category,
           budgetId: budgetId,
+          type: row.type
         })
-        if (!category) {
-          const createdCategory = await this.categoryService.create({
-              name: row.category,
-              budgetId: budgetId,
-              type: row.type
-            })
+        if (createdCategory.isLeft()) continue
+        category = createdCategory.value.category
+      }
 
-          if (createdCategory.isLeft()) continue
-          category = createdCategory.value.category
-        }
+      subcategory = await this.subcategoriesRepository.findByName(row.subcategory)
+      if (!subcategory) {
+        const createdSubcategory = await this.subcategoryService.create({
+          name: row.subcategory,
+          categoryId: category.id.toString()
+        })
+        if (createdSubcategory.isLeft()) continue
+        subcategory = createdSubcategory.value.subcategory
+      }
 
-        subcategory = await this.subcategoriesRepository.findByName( 
-          row.subcategory
-        )
-
-        if(!subcategory){
-          const createdSubcategory = await this.subcategoryService.create({
-            name: row.subcategory,
-            categoryId: category.id.toString()
-          })
-
-          if (createdSubcategory.isLeft()) continue
-          subcategory = createdSubcategory.value.subcategory
-        }
-
-        account = await this.accountsRepository.findByName({
+      account = await this.accountsRepository.findByName({
+        name: row.account,
+        budgetId: budgetId,
+      })
+      if (!account) {
+        const createdAccount = await this.accountService.createAccount({
           name: row.account,
           budgetId: budgetId,
+          balance: 0,
+          ownerId
         })
-
-        if(!account){
-          const createdAccount = await this.accountService.createAccount({
-            name: row.account,
-            budgetId: budgetId,
-            balance: 0,
-            ownerId
-          })
-
-          if (createdAccount.isLeft()) continue
-          account = createdAccount.value.account
-        }
-
+        if (createdAccount.isLeft()) continue
+        account = createdAccount.value.account
+      }
 
       const transaction = await this.transactionService.createTransaction({
         description: row.description,
@@ -104,9 +103,7 @@ export class ImportTransactionsUseCase {
         subcategoryId: subcategory.id.toString(),
       })
 
-      if (transaction.isLeft()) {
-        continue
-      }
+      if (transaction.isLeft()) continue
       results.push(transaction.value.transaction)
     }
 

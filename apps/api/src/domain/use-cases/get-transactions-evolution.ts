@@ -1,8 +1,11 @@
-import { Either, right } from '@/core/either'
+import { Either, left, right } from '@/core/either'
 import { TransactionsRepository } from '../repositories/transaction-repository'
+import { UserBudgetRepository } from '../repositories/user-budget-repository'
+import { UnauthorizedError } from './errors/unauthorized-error'
 
 interface GetTransactionsEvolutionRequest {
   budgetId: string
+  userId: string
   year: number
   accountId?: string
 }
@@ -15,16 +18,25 @@ export interface MonthEvolution {
   balance: number
 }
 
-type GetTransactionsEvolutionResponse = Either<null, { evolution: MonthEvolution[] }>
+type GetTransactionsEvolutionResponse = Either<UnauthorizedError, { evolution: MonthEvolution[] }>
 
 export class GetTransactionsEvolutionUseCase {
-  constructor(private transactionsRepository: TransactionsRepository) {}
+  constructor(
+    private transactionsRepository: TransactionsRepository,
+    private userBudgetRepository: UserBudgetRepository,
+  ) {}
 
   async execute({
     budgetId,
+    userId,
     year,
     accountId,
   }: GetTransactionsEvolutionRequest): Promise<GetTransactionsEvolutionResponse> {
+    const userBudget = await this.userBudgetRepository.findByUserIdAndBudgetId(userId, budgetId)
+    if (!userBudget) {
+      return left(new UnauthorizedError())
+    }
+
     const months = Array.from({ length: 12 }, (_, i) => i + 1)
 
     const evolution = await Promise.all(

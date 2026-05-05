@@ -1,3 +1,4 @@
+import { UnauthorizedError } from '@/domain/use-cases/errors/unauthorized-error'
 import { makeFetchTransactionsUseCase } from '@/infra/factories/transaction.factories'
 import { TransactionPresenter } from '@/infra/http/presenters/transaction-presenter'
 import type { FastifyTypedInstance } from '@/utils/fastifyTypes'
@@ -23,18 +24,24 @@ export async function fetchTransactionsRoute(app: FastifyTypedInstance) {
       querystring: querySchema,
       response: {
         200: { description: 'Transactions fetched successfully' },
+        403: { description: 'Forbidden' },
         404: { description: 'No transactions found' },
       },
     },
   }, async (request, reply) => {
     const { budgetId, accountId, categoryId, subcategoryId, type, month, year, page, perPage } = request.query
+    const userId = request.user.sub
 
     const result = await makeFetchTransactionsUseCase().execute({
+      userId,
       filters: { budgetId, accountId, categoryId, subcategoryId, type, month, year },
       pagination: { page, perPage },
     })
 
     if (result.isLeft()) {
+      if (result.value instanceof UnauthorizedError) {
+        return reply.status(403).send({ error: 'Forbidden' })
+      }
       return reply.status(404).send({ error: 'Not Found' })
     }
 

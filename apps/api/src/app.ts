@@ -1,9 +1,12 @@
 import fastifyCors from "@fastify/cors";
+import fastifyHelmet from "@fastify/helmet";
 import fastifyMultipart from "@fastify/multipart";
+import fastifyRateLimit from "@fastify/rate-limit";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUi from "@fastify/swagger-ui";
 import fastify from "fastify";
 import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod';
+import { env } from "./env";
 import { verifyAuth } from "./infra/http/middleware/verify-auth";
 import { authRoute } from "./infra/http/routes/auth.route";
 import { createAccountRoute } from "./infra/http/routes/create-account.route";
@@ -39,21 +42,33 @@ export const app = fastify().withTypeProvider<ZodTypeProvider>()
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
 
-app.register(fastifyCors)
-app.register(fastifyMultipart)
-app.register(fastifySwagger, {
-  openapi: {
-    info: {
-      title: 'Neko Finance API',
-      description: 'API para gerenciamento de orçamentos',
-      version: '1.0.0'
-    }
-  }
+app.register(fastifyHelmet)
+app.register(fastifyCors, {
+  origin: [env.CLIENT_ORIGIN],
+  credentials: true,
 })
-app.register(fastifySwaggerUi, {
-  routePrefix: '/docs',
+app.register(fastifyRateLimit, {
+  max: 200,
+  timeWindow: '1 minute',
+})
+app.register(fastifyMultipart, {
+  limits: { fileSize: 10 * 1024 * 1024 },
 })
 
+if (env.NODE_ENV !== 'prod') {
+  app.register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: 'Neko Finance API',
+        description: 'API para gerenciamento de orçamentos',
+        version: '1.0.0'
+      }
+    }
+  })
+  app.register(fastifySwaggerUi, {
+    routePrefix: '/docs',
+  })
+}
 
 app.register(authRoute)
 

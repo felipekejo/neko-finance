@@ -1,3 +1,4 @@
+import { UnauthorizedError } from '@/domain/use-cases/errors/unauthorized-error'
 import { makeGetTransactionByIdUseCase } from '@/infra/factories/transaction.factories'
 import { TransactionPresenter } from '@/infra/http/presenters/transaction-presenter'
 import type { FastifyTypedInstance } from '@/utils/fastifyTypes'
@@ -15,15 +16,20 @@ export async function getTransactionByIdRoute(app: FastifyTypedInstance) {
       params: paramsSchema,
       response: {
         200: { description: 'Transaction found' },
+        403: { description: 'Forbidden' },
         404: { description: 'Transaction not found' },
       },
     },
   }, async (request, reply) => {
     const { transactionId } = request.params
+    const userId = request.user.sub
 
-    const result = await makeGetTransactionByIdUseCase().execute({ id: transactionId })
+    const result = await makeGetTransactionByIdUseCase().execute({ id: transactionId, userId })
 
     if (result.isLeft()) {
+      if (result.value instanceof UnauthorizedError) {
+        return reply.status(403).send({ error: 'Forbidden' })
+      }
       return reply.status(404).send({ error: 'Not Found' })
     }
 

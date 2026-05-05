@@ -6,24 +6,26 @@ import { PrismaBudgetsRepository } from '@/infra/database/prisma/repositories/pr
 import { PrismaUserBudgetRepository } from '@/infra/database/prisma/repositories/prisma-user-budget-repository'
 import { prisma } from '@/lib/prisma'
 
+function budgetsRepository() {
+  return new PrismaBudgetsRepository(prisma)
+}
+
+function userBudgetRepository() {
+  return new PrismaUserBudgetRepository(prisma)
+}
+
 export function makeCreateBudgetUseCase() {
-  return new CreateBudgetUseCase(new PrismaBudgetsRepository(prisma))
+  return new CreateBudgetUseCase(budgetsRepository())
 }
 
 export function makeAssignBudgetUseCase() {
-  return new AssignBudgetUseCase(
-    new PrismaBudgetsRepository(prisma),
-    new PrismaUserBudgetRepository(prisma),
-  )
+  return new AssignBudgetUseCase(budgetsRepository(), userBudgetRepository())
 }
 
 export function makeDeleteBudgetUseCase() {
-  return new DeleteBudgetUseCase(
-    new PrismaBudgetsRepository(prisma),
-    new PrismaUserBudgetRepository(prisma),
-  )
+  return new DeleteBudgetUseCase(budgetsRepository(), userBudgetRepository())
 }
 
 export function makeGetBudgetByIdUseCase() {
-  return new GetBudgetByIdUseCase(new PrismaBudgetsRepository(prisma))
+  return new GetBudgetByIdUseCase(budgetsRepository(), userBudgetRepository())
 }

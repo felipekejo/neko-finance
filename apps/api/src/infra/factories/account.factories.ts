@@ -4,10 +4,15 @@ import { EditAccountUseCase } from '@/domain/use-cases/edit-account'
 import { FetchAccountsUseCase } from '@/domain/use-cases/fetch-accounts'
 import { GetAccountByIdUseCase } from '@/domain/use-cases/get-account-by-id'
 import { PrismaAccountsRepository } from '@/infra/database/prisma/repositories/prisma-accounts-repository'
+import { PrismaUserBudgetRepository } from '@/infra/database/prisma/repositories/prisma-user-budget-repository'
 import { prisma } from '@/lib/prisma'
 
 function accountsRepository() {
   return new PrismaAccountsRepository(prisma)
+}
+
+function userBudgetRepository() {
+  return new PrismaUserBudgetRepository(prisma)
 }
 
 export function makeCreateAccountUseCase() {
@@ -23,7 +28,7 @@ export function makeEditAccountUseCase() {
 }
 
 export function makeFetchAccountsUseCase() {
-  return new FetchAccountsUseCase(accountsRepository())
+  return new FetchAccountsUseCase(accountsRepository(), userBudgetRepository())
 }
 
 export function makeGetAccountByIdUseCase() {

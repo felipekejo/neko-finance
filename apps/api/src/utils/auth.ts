@@ -7,16 +7,14 @@ const pool = new Pool({
 });
 
 export const auth = betterAuth({
-  baseURL: "http://localhost:3333",
+  baseURL: env.BETTER_AUTH_URL,
   basePath: "/auth",
   database: pool,
   emailAndPassword: {
     enabled: true,
   },
   logger: {
-    level: "debug",
+    level: env.NODE_ENV === 'prod' ? 'error' : 'warn',
   },
-  trustedOrigins: [
-    process.env.CLIENT_ORIGIN ?? "http://localhost:3333",
-  ],
+  trustedOrigins: [env.CLIENT_ORIGIN],
 })

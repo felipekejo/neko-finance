@@ -6,7 +6,8 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3333),
   DATABASE_URL: z.string(),
   BETTER_AUTH_SECRET: z.string(),
-  BETTER_AUTH_URL: z.string()
+  BETTER_AUTH_URL: z.string(),
+  CLIENT_ORIGIN: z.string().url().default('http://localhost:3001'),
 });
 const _env = envSchema.safeParse(process.env);
 

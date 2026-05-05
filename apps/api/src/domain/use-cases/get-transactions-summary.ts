@@ -1,9 +1,12 @@
-import { Either, right } from '@/core/either'
+import { Either, left, right } from '@/core/either'
 import { CategoriesRepository } from '../repositories/category-repository'
 import { TransactionFilters, TransactionsRepository } from '../repositories/transaction-repository'
+import { UserBudgetRepository } from '../repositories/user-budget-repository'
+import { UnauthorizedError } from './errors/unauthorized-error'
 
 interface GetTransactionsSummaryRequest {
   budgetId: string
+  userId: string
   accountId?: string
   type?: 'INCOMES' | 'EXPENSES'
   month?: number
@@ -24,21 +27,28 @@ export interface TransactionsSummary {
   byCategory: CategorySummary[]
 }
 
-type GetTransactionsSummaryResponse = Either<null, { summary: TransactionsSummary }>
+type GetTransactionsSummaryResponse = Either<UnauthorizedError, { summary: TransactionsSummary }>
 
 export class GetTransactionsSummaryUseCase {
   constructor(
     private transactionsRepository: TransactionsRepository,
     private categoriesRepository: CategoriesRepository,
+    private userBudgetRepository: UserBudgetRepository,
   ) {}
 
   async execute({
     budgetId,
+    userId,
     accountId,
     type,
     month,
     year,
   }: GetTransactionsSummaryRequest): Promise<GetTransactionsSummaryResponse> {
+    const userBudget = await this.userBudgetRepository.findByUserIdAndBudgetId(userId, budgetId)
+    if (!userBudget) {
+      return left(new UnauthorizedError())
+    }
+
     const filters: TransactionFilters = { budgetId, accountId, type }
 
     if (month && year) {

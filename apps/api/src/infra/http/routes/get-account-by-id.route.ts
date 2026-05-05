@@ -1,4 +1,5 @@
 import { ResourceNotFoundError } from '@/domain/use-cases/errors/resource-not-found-error'
+import { UnauthorizedError } from '@/domain/use-cases/errors/unauthorized-error'
 import { makeGetAccountByIdUseCase } from '@/infra/factories/account.factories'
 import { AccountPresenter } from '@/infra/http/presenters/account-presenter'
 import type { FastifyTypedInstance } from '@/utils/fastifyTypes'
@@ -17,16 +18,21 @@ export async function getAccountByIdRoute(app: FastifyTypedInstance) {
       response: {
         200: { description: 'Account found' },
         400: { description: 'Bad Request' },
+        403: { description: 'Forbidden' },
         404: { description: 'Account not found' },
       },
     },
   }, async (request, reply) => {
     const { accountId } = request.params
+    const userId = request.user.sub
 
-    const result = await makeGetAccountByIdUseCase().execute({ id: accountId })
+    const result = await makeGetAccountByIdUseCase().execute({ id: accountId, userId })
 
     if (result.isLeft()) {
       const error = result.value
+      if (error instanceof UnauthorizedError) {
+        return reply.status(403).send({ error: 'Forbidden' })
+      }
       if (error instanceof ResourceNotFoundError) {
         return reply.status(404).send({ error: error.message })
       }

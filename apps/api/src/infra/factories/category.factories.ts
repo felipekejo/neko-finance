@@ -13,26 +13,30 @@ function categoriesRepository() {
   return new PrismaCategoryRepository(prisma)
 }
 
+function userBudgetRepository() {
+  return new PrismaUserBudgetRepository(prisma)
+}
+
 export function makeCreateCategoryUseCase() {
-  return new CreateCategoryUseCase(new CategoryService(categoriesRepository()))
+  return new CreateCategoryUseCase(new CategoryService(categoriesRepository()), userBudgetRepository())
 }
 
 export function makeDeleteCategoryUseCase() {
   return new DeleteCategoryUseCase(
     categoriesRepository(),
     new PrismaBudgetsRepository(prisma),
-    new PrismaUserBudgetRepository(prisma),
+    userBudgetRepository(),
   )
 }
 
 export function makeEditCategoryUseCase() {
-  return new EditCategoryUseCase(categoriesRepository(), new PrismaBudgetsRepository(prisma))
+  return new EditCategoryUseCase(categoriesRepository(), new PrismaBudgetsRepository(prisma), userBudgetRepository())
 }
 
 export function makeFetchCategoriesUseCase() {
-  return new FetchCategoriesUseCase(categoriesRepository())
+  return new FetchCategoriesUseCase(categoriesRepository(), userBudgetRepository())
 }
 
 export function makeGetCategoryByIdUseCase() {
-  return new GetCategoryByIdUseCase(categoriesRepository())
+  return new GetCategoryByIdUseCase(categoriesRepository(), userBudgetRepository())
 }

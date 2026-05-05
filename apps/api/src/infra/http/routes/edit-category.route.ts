@@ -1,4 +1,5 @@
 import { ResourceNotFoundError } from '@/domain/use-cases/errors/resource-not-found-error'
+import { UnauthorizedError } from '@/domain/use-cases/errors/unauthorized-error'
 import { makeEditCategoryUseCase } from '@/infra/factories/category.factories'
 import type { FastifyTypedInstance } from '@/utils/fastifyTypes'
 import { z } from 'zod'
@@ -23,17 +24,22 @@ export async function editCategoryRoute(app: FastifyTypedInstance) {
       response: {
         204: { description: 'Category updated successfully' },
         400: { description: 'Bad Request' },
+        403: { description: 'Forbidden' },
         404: { description: 'Category not found' },
       },
     },
   }, async (request, reply) => {
     const { categoryId } = request.params
     const { budgetId, name, type } = request.body
+    const userId = request.user.sub
 
-    const result = await makeEditCategoryUseCase().execute({ categoryId, budgetId, name, type })
+    const result = await makeEditCategoryUseCase().execute({ categoryId, budgetId, userId, name, type })
 
     if (result.isLeft()) {
       const error = result.value
+      if (error instanceof UnauthorizedError) {
+        return reply.status(403).send({ error: 'Forbidden' })
+      }
       if (error instanceof ResourceNotFoundError) {
         return reply.status(404).send({ error: error.message })
       }

@@ -1,3 +1,4 @@
+import { UnauthorizedError } from '@/domain/use-cases/errors/unauthorized-error'
 import { makeCreateTransactionUseCase } from '@/infra/factories/transaction.factories'
 import { TransactionPresenter } from '@/infra/http/presenters/transaction-presenter'
 import type { FastifyTypedInstance } from '@/utils/fastifyTypes'
@@ -21,13 +22,16 @@ export async function createTransactionRoute(app: FastifyTypedInstance) {
       body: bodySchema,
       response: {
         201: { description: 'Transaction created successfully' },
+        403: { description: 'Forbidden' },
         400: { description: 'Bad Request' },
       },
     },
   }, async (request, reply) => {
     const { budgetId, accountId, categoryId, description, amount, type, date } = request.body
+    const userId = request.user.sub
 
     const result = await makeCreateTransactionUseCase().execute({
+      userId,
       budgetId,
       accountId,
       categoryId,
@@ -38,6 +42,9 @@ export async function createTransactionRoute(app: FastifyTypedInstance) {
     })
 
     if (result.isLeft()) {
+      if (result.value instanceof UnauthorizedError) {
+        return reply.status(403).send({ error: 'Forbidden' })
+      }
       return reply.status(400).send({ error: 'Bad Request' })
     }
 
